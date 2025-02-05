@@ -4,9 +4,32 @@ import * as acorn from 'acorn'; // For syntax validation
 import * as esprima from 'esprima'; // Correctly import esprima
 import * as escodegen from 'escodegen'; // For generating code from AST
 
+// Define a custom AstNode type
 type AstNode = {
   type: string;
-  [key: string]: any; // Allow other properties
+  loc?: {
+    start: { line: number; column: number };
+    end?: { line: number; column: number };
+  };
+  body?: AstNode[];
+  expression?: AstNode;
+  callee?: AstNode;
+  name?: string;
+  arguments?: AstNode[];
+  declarations?: AstNode[];
+  init?: AstNode;
+  test?: AstNode;
+  consequent?: AstNode;
+  alternate?: AstNode;
+  object?: AstNode;
+  property?: AstNode;
+  value?: AstNode;
+  key?: AstNode;
+  params?: AstNode[];
+  id?: AstNode;
+  superClass?: AstNode;
+  instrumented?: boolean; // Custom property for instrumentation
+  [key: string]: unknown; // Index signature for dynamic properties
 };
 
 export async function POST(req: Request) {
@@ -27,7 +50,7 @@ export async function POST(req: Request) {
       });
     }
     // Parse the code into an Abstract Syntax Tree (AST)
-    const ast = esprima.parseScript(code, { loc: true });
+    const ast = esprima.parseScript(code, { loc: true }) as unknown as AstNode; // Cast to AstNode
     // Helper function to recursively traverse and instrument the AST
     const instrumentAst = (node: AstNode): AstNode => {
       if (!node || typeof node !== 'object') {
@@ -50,11 +73,11 @@ export async function POST(req: Request) {
         node.type === 'ExpressionStatement' &&
         node.expression?.type === 'CallExpression' &&
         node.expression.callee?.type === 'Identifier' &&
-        ['setTimeout', 'setInterval'].includes(node.expression.callee.name)
+        ['setTimeout', 'setInterval'].includes(node.expression.callee.name ?? '') // Handle undefined `name`
       ) {
         return node;
       }
-      if (node.type === 'Program') {
+      if (node.type === 'Program' && node.body) {
         // Wrap each top-level statement in a try-catch, except for skipped nodes
         node.body = node.body.map((stmt: AstNode) => {
           if (
@@ -76,7 +99,7 @@ export async function POST(req: Request) {
             }
           `,
             { loc: true }
-          ).body[0]; // Parse the try-catch block back into an AST node
+          ).body[0] as unknown as AstNode; // Cast to AstNode
           // Mark the try-catch node as instrumented to prevent reprocessing
           tryCatchNode.instrumented = true;
           return tryCatchNode;
@@ -85,7 +108,7 @@ export async function POST(req: Request) {
       // Recursively traverse child nodes
       for (const key in node) {
         if (node[key] && typeof node[key] === 'object') {
-          node[key] = instrumentAst(node[key]); // Recurse into child nodes
+          node[key] = instrumentAst(node[key] as AstNode); // Recurse into child nodes
         }
       }
       return node;
