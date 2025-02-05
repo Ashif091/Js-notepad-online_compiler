@@ -13,10 +13,10 @@ const Console: React.FC<ConsoleProps> = ({ output, onClose, executionTime }) => 
   const consoleRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ x: 600, y: 200 })
   const [size, setSize] = useState({ width: 500, height: 300 })
-  const [isDragging, setIsDragging] = useState(false)
+//   const [isDragging, setIsDragging] = useState(false)
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true)
+    // setIsDragging(true)
     const startX = e.clientX - position.x
     const startY = e.clientY - position.y
 
@@ -28,7 +28,7 @@ const Console: React.FC<ConsoleProps> = ({ output, onClose, executionTime }) => 
     }
 
     const handleMouseUp = () => {
-      setIsDragging(false)
+    //   setIsDragging(false)
       document.removeEventListener("mousemove", handleMouseMove)
       document.removeEventListener("mouseup", handleMouseUp)
     }

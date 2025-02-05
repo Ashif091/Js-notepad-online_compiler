@@ -39,6 +39,7 @@ export default function Home() {
       setShowConsole(true) // Show the console after running the code
     } catch (error) {
       setOutput("Error: Failed to execute code.")
+      console.log(error)
       setErrorLine(null) // Clear error line on network errors
     }
   }
