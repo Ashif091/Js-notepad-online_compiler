@@ -5,6 +5,12 @@ import axios from "axios"
 import TextEditor from "./components/TextEditor"
 import Console from "./components/Console"
 import { Play, RotateCcw, FileText } from "lucide-react" // Import icons
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./components/ui/tooltip"
 
 export default function Home() {
   const [code, setCode] = useState<string>("// Write your JavaScript code here\nconsole.log('Hello, World!');")
@@ -25,12 +31,29 @@ export default function Home() {
     localStorage.setItem("savedCode", code)
   }, [code])
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === "Enter") {
+        event.preventDefault() // Prevent any default behavior
+        runCode() // Trigger the runCode function
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [code])
+
   // Function to send the code to the backend API using Axios
   const runCode = async () => {
     try {
       const response = await axios.post("/api/run-code", { code })
       if (response.data.success) {
         setOutput(response.data.output)
+        console.log("out",response.data.output)
         setErrorLine(null) // Clear error line if successful
       } else {
         setOutput(`Error: ${response.data.error}`)
@@ -62,13 +85,22 @@ export default function Home() {
           <h1 className="text-lg font-bold">JS Notepad</h1>
         </div>
         <div className="space-x-2">
-          <button
-            onClick={runCode}
-            className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200"
-            aria-label="Run Code"
-          >
-            <Play className="w-4 h-4" />
-          </button>
+        <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={runCode}
+                  className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200"
+                  aria-label="Run Code"
+                >
+                  <Play className="w-4 h-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Ctrl + Enter</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <button
             onClick={clearCode}
             className="p-2 bg-red-600 text-white rounded hover:bg-red-700 transition duration-200"
