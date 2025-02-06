@@ -90,7 +90,7 @@ export default function Home() {
               <TooltipTrigger asChild>
                 <button
                   onClick={runCode}
-                  className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200"
+                  className="p-2  text-white rounded transition duration-200"
                   aria-label="Run Code"
                 >
                   <Play className="w-4 h-4" />
@@ -103,7 +103,7 @@ export default function Home() {
           </TooltipProvider>
           <button
             onClick={clearCode}
-            className="p-2 bg-red-600 text-white rounded hover:bg-red-700 transition duration-200"
+            className="p-2  text-white rounded  transition duration-200"
             aria-label="Clear Code"
           >
             <RotateCcw className="w-4 h-4" />
