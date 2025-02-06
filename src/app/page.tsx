@@ -69,7 +69,7 @@ export default function Home() {
 
   // Function to clear the code and localStorage
   const clearCode = () => {
-    setCode("// Write your JavaScript code here")
+    setCode("")
     localStorage.removeItem("savedCode")
     setOutput("")
     setErrorLine(null)
