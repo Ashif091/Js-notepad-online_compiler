@@ -31,7 +31,10 @@ const TextEditor: React.FC<TextEditorProps> = ({ code, setCode, errorLine }) => 
     if (!textarea) return;
 
     const { selectionStart, selectionEnd, value } = textarea;
-
+    if (event.ctrlKey && event.key === "Enter") {
+      event.preventDefault() 
+      return ;
+    }
     // Handle formatting (Shift+Alt+F)
     if (event.shiftKey && event.altKey && event.key === "F") {
       event.preventDefault();
