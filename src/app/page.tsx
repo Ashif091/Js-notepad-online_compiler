@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import {useState, useEffect} from "react"
 import axios from "axios"
 import TextEditor from "./components/TextEditor"
 import Console from "./components/Console"
-import { Play, RotateCcw, FileText, Info } from "lucide-react" // Import icons
+import {Play, RotateCcw, FileText, Info} from "lucide-react" // Import icons
 import {
   Tooltip,
   TooltipContent,
@@ -14,7 +14,9 @@ import {
 import Settings from "./components/Settings"
 
 export default function Home() {
-  const [code, setCode] = useState<string>("// Write your JavaScript code here\nconsole.log('Hello, World!');")
+  const [code, setCode] = useState<string>(
+    "// Write your JavaScript code here\nconsole.log('Hello, World!');"
+  )
   const [output, setOutput] = useState<string>("")
   const [errorLine, setErrorLine] = useState<number | null>(null)
   const [showConsole, setShowConsole] = useState<boolean>(false)
@@ -52,10 +54,10 @@ export default function Home() {
   // Function to send the code to the backend API using Axios
   const runCode = async () => {
     try {
-      const response = await axios.post("/api/run-code", { code })
+      const response = await axios.post("/api/run-code", {code})
       if (response.data.success) {
         setOutput(response.data.output)
-        console.log("out",response.data.output)
+        console.log("out", response.data.output)
         setErrorLine(null) // Clear error line if successful
       } else {
         setOutput(`Error: ${response.data.error}`)
@@ -87,7 +89,7 @@ export default function Home() {
           <h1 className="text-lg font-bold">JS Notepad</h1>
         </div>
         <div className="space-x-2">
-        <TooltipProvider>
+          <TooltipProvider>
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <button
@@ -103,20 +105,38 @@ export default function Home() {
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <button
-            onClick={clearCode}
-            className="p-2  text-white rounded  transition duration-200"
-            aria-label="Clear Code"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className="p-2 text-white rounded transition duration-200"
-            aria-label="Settings"
-          >
-            <Info className="w-4 h-4" />
-          </button>
+          <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={clearCode}
+                  className="p-2  text-white rounded  transition duration-200"
+                  aria-label="Clear Code"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Clear Code</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setShowSettings(!showSettings)}
+                  className="p-2 text-white rounded transition duration-200"
+                  aria-label="Settings"
+                >
+                  <Info className="w-4 h-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Settings</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </header>
 
@@ -126,11 +146,14 @@ export default function Home() {
         <TextEditor code={code} setCode={setCode} errorLine={errorLine} />
 
         {/* Console Output */}
-        {showConsole && <Console output={output} onClose={() => setShowConsole(false)} />}
-        <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
+        {showConsole && (
+          <Console output={output} onClose={() => setShowConsole(false)} />
+        )}
+        <Settings
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+        />
       </main>
     </div>
   )
 }
-
- 
