@@ -121,7 +121,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="flex flex-1 space-x-4">
+      <main className="flex flex-1 space-x-4 cust-scroll">
         {/* Text Editor */}
         <TextEditor code={code} setCode={setCode} errorLine={errorLine} />
 

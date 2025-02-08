@@ -1,40 +1,48 @@
-"use client";
-import { useState, useRef } from "react";
-import { X } from "lucide-react";
-import { useSettingsStore } from "../store/settingsStore";
+"use client"
+import {useState, useRef} from "react"
+import {X} from "lucide-react"
+import {useSettingsStore} from "../store/settingsStore"
 
 interface SettingsProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
 }
 
-const Settings: React.FC<SettingsProps> = ({ isOpen, onClose }) => {
-  const [position, setPosition] = useState({ x: 200, y: 100 });
-  const dragRef = useRef<HTMLDivElement>(null);
-  const { tabFunction, formatFunction, setTabFunction, setFormatFunction, useCodeEditor, setUseCodeEditor } =
-    useSettingsStore();
+const Settings: React.FC<SettingsProps> = ({isOpen, onClose}) => {
+  const [position, setPosition] = useState({x: 200, y: 100})
+  const dragRef = useRef<HTMLDivElement>(null)
+  const {
+    tabFunction,
+    formatFunction,
+    setTabFunction,
+    setFormatFunction,
+    useCodeEditor,
+    setUseCodeEditor,
+    autoClosing,
+    setAutoClosing,
+  } = useSettingsStore()
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    const startX = e.clientX - position.x;
-    const startY = e.clientY - position.y;
+    const startX = e.clientX - position.x
+    const startY = e.clientY - position.y
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       setPosition({
         x: moveEvent.clientX - startX,
         y: moveEvent.clientY - startY,
-      });
-    };
+      })
+    }
 
     const handleMouseUp = () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
+    }
 
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-  };
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div
@@ -61,32 +69,50 @@ const Settings: React.FC<SettingsProps> = ({ isOpen, onClose }) => {
 
       {/* Content */}
       <div className="p-4 space-y-4">
-        {/* Toggle for Tab Function */}
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Tab Function</span>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={tabFunction}
-              onChange={(e) => setTabFunction(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
-        </div>
+        <div
+          className={`${useCodeEditor ? "opacity-50 pointer-events-none  space-y-4 " : "space-y-4"}`}
+        >
+          {/* Toggle for Tab Function */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Tab Function</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={tabFunction}
+                onChange={(e) => setTabFunction(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Auto Closing Brackets</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={autoClosing}
+                onChange={(e) => setAutoClosing(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
 
-        {/* Toggle for Format Function */}
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Format Function (Shift + Alt + F)</span>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={formatFunction}
-              onChange={(e) => setFormatFunction(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
+          {/* Toggle for Format Function */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">
+              Format Function (Shift + Alt + F)
+            </span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formatFunction}
+                onChange={(e) => setFormatFunction(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
         </div>
 
         {/* Toggle for Use Code Editor */}
@@ -104,7 +130,7 @@ const Settings: React.FC<SettingsProps> = ({ isOpen, onClose }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Settings;
+export default Settings

@@ -16,7 +16,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ code, setCode, errorLine }) => 
   const [undoStack, setUndoStack] = useState<{ value: string; cursorPos: number }[]>([]);
   const [redoStack, setRedoStack] = useState<{ value: string; cursorPos: number }[]>([]);
   
-  const { tabFunction, formatFunction ,useCodeEditor} = useSettingsStore()
+  const { tabFunction, formatFunction ,useCodeEditor,autoClosing} = useSettingsStore()
   
   useEffect(() => {
     const syncScroll = () => {
@@ -154,7 +154,10 @@ const TextEditor: React.FC<TextEditorProps> = ({ code, setCode, errorLine }) => 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     const { selectionStart } = e.target;
-
+    if (!autoClosing) {
+      updateCode(newValue, selectionStart);
+      return;
+    }
     const char = newValue[selectionStart - 1]; // The last typed character
     const pairs: { [key: string]: string } = {
       '"': '"',
@@ -270,7 +273,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ code, setCode, errorLine }) => 
   }
 
   return (
-    <div className="w-full h-[calc(100vh-4rem)] relative font-mono text-sm">
+    <div className="w-full h-[calc(100vh-4rem)] relative font-mono text-sm ">
       {useCodeEditor ? (
         <MonacoEditor
           height="100%"
