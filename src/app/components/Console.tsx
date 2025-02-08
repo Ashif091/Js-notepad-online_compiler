@@ -77,7 +77,7 @@ const Console: React.FC<ConsoleProps> = ({ output, onClose, executionTime }) => 
     >
       {/* Header */}
       <div onMouseDown={handleMouseDown} className="bg-gray-800 p-2 cursor-move flex justify-between items-center">
-        <span>Console</span>
+        <span className="text-sm font-bold font-mono">Console</span>
         <button onClick={onClose} className="text-red-500 hover:text-red-700">
           X
         </button>

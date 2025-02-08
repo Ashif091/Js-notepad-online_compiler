@@ -143,7 +143,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="flex flex-1 space-x-4 cust-scroll">
         {/* Text Editor */}
-        <TextEditor code={code} setCode={setCode} errorLine={errorLine} />
+        <TextEditor code={code} setCode={setCode} setOutput={setOutput} errorLine={errorLine} setShowConsole={setShowConsole} />
 
         {/* Console Output */}
         {showConsole && (

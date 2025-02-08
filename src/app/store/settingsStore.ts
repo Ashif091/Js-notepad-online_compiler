@@ -6,6 +6,8 @@ interface SettingsState {
     formatFunction: boolean
     useCodeEditor: boolean
     autoClosing:boolean
+    autoAdjust:boolean
+    setAutoAdjust: (value: boolean) => void
     setAutoClosing: (value: boolean) => void
     setTabFunction: (value: boolean) => void
     setFormatFunction: (value: boolean) => void
@@ -20,6 +22,8 @@ export const useSettingsStore = create<SettingsState>()(
         formatFunction: true,
         useCodeEditor: false,
         autoClosing: true,
+        autoAdjust:true,
+        setAutoAdjust: (value) => set({ autoAdjust: value }),
         setAutoClosing: (value) => set({ autoClosing: value }),
         setTabFunction: (value) => set({ tabFunction: value }),
         setFormatFunction: (value) => set({ formatFunction: value }),

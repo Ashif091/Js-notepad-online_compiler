@@ -7,26 +7,27 @@ const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false 
 interface TextEditorProps {
   code: string;
   setCode: (code: string) => void;
+  setOutput:(code: string) => void;
+  setShowConsole:(value:boolean) => void;
   errorLine: number | null;
 }
 
-const TextEditor: React.FC<TextEditorProps> = ({ code, setCode, errorLine }) => {
+const TextEditor: React.FC<TextEditorProps> = ({ code, setCode, errorLine,setOutput,setShowConsole }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
   const [undoStack, setUndoStack] = useState<{ value: string; cursorPos: number }[]>([]);
   const [redoStack, setRedoStack] = useState<{ value: string; cursorPos: number }[]>([]);
   
-  const { tabFunction, formatFunction ,useCodeEditor,autoClosing} = useSettingsStore()
+  const { tabFunction, formatFunction ,useCodeEditor,autoClosing,autoAdjust} = useSettingsStore()
   
   useEffect(() => {
-    const syncScroll = () => {
-      if (textareaRef.current && lineNumbersRef.current) {
-        lineNumbersRef.current.scrollTop = textareaRef.current.scrollTop;
-      }
-    };
-    textareaRef.current?.addEventListener("scroll", syncScroll);
-    return () => textareaRef.current?.removeEventListener("scroll", syncScroll);
-  }, []);
+    if (textareaRef.current && lineNumbersRef.current) {
+      textareaRef.current.style.height = "auto"; // Reset height
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; // Expand height dynamically
+
+      lineNumbersRef.current.style.height = textareaRef.current.style.height; // Match line numbers height
+    }
+  }, [code]);
 
   // const codeLines = code.split("\n");
 
@@ -71,7 +72,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ code, setCode, errorLine }) => 
     }
 
     // Handle Enter key
-    if (event.key === "Enter") {
+    if (autoAdjust&&event.key === "Enter") {
       event.preventDefault();
 
       const prevChar = value[selectionStart - 1];
@@ -247,9 +248,9 @@ const TextEditor: React.FC<TextEditorProps> = ({ code, setCode, errorLine }) => 
       const prettier = (await import("prettier")).default;
       const parserBabel = (await import("prettier/parser-babel")).default;
 
-      // Ensure `code` is a string
+
       if (typeof code !== "string") {
-        console.error("Invalid code format: Expected a string.");
+        console.log("Invalid code format: Expected a string.");
         return;
       }
 
@@ -263,9 +264,10 @@ const TextEditor: React.FC<TextEditorProps> = ({ code, setCode, errorLine }) => 
 
       updateCode(formattedCode, 0);
     } catch (error) {
-      console.error("Error formatting code:", error);
-    }
-  };
+      setOutput(`Error formatting code: ${error}`)
+      setShowConsole(true)
+    } 
+  }; 
   const handleMonacoChange = (value: string | undefined) => {
     if (value !== undefined) {
       setCode(value)
@@ -288,35 +290,43 @@ const TextEditor: React.FC<TextEditorProps> = ({ code, setCode, errorLine }) => 
           }}
         />
       ) : (
-        <>
-          {/* Line Numbers */}
-          <div
-            ref={lineNumbersRef}
-            className="absolute top-0 left-0 w-12 h-full bg-[#1e1e1e] text-right pr-2 overflow-hidden"
-            style={{ paddingTop: "0.5rem" }}
-          >
-            {code.split("\n").map((_, index) => (
-              <div
-                key={index}
-                className={`leading-6 ${errorLine === index + 1 ? "text-red-500 font-bold" : "text-gray-500"}`}
-              >
-                {index + 1}
-              </div>
-            ))}
-          </div>
-
-          {/* Code Editor */}
-          <textarea
-            ref={textareaRef}
-            className="w-full h-full p-2 pl-14 bg-[#272727] text-white rounded-none resize-none outline-none"
-            value={code}
-            placeholder="Write your JavaScript code here..."
-            style={{ lineHeight: "1.5rem" }}
-            onKeyDown={handleKeyDown}
-            onChange={handleChange}
-            rows={20}
-          ></textarea>
-        </>
+        <div className="flex w-full">
+        {/* Line Numbers */}
+        <div
+          ref={lineNumbersRef}
+          className="top-0 left-0 w-12 min-h-screen bg-[#1e1e1e] text-right pr-2 overflow-hidden"
+          style={{
+            paddingTop: "0.5rem",
+          }}
+        >
+          {code.split("\n").map((_, index) => (
+            <div
+              key={index}
+              className={`leading-6 ${errorLine === index + 1 ? "text-red-500 font-bold" : "text-gray-500"}`}
+            >
+              {index + 1}
+            </div>
+          ))}
+        </div>
+  
+        {/* Code Editor */}
+        <textarea
+          ref={textareaRef}
+          className="w-full min-h-screen p-2 pl-6 bg-[#272727] text-white rounded-none resize-none outline-none"
+          value={code}
+          placeholder="Write your JavaScript code here..."
+          style={{
+            lineHeight: "1.5rem",
+            overflowY: "hidden", 
+            whiteSpace: "pre-wrap", 
+            wordBreak: "break-word", 
+          }}
+          onKeyDown={handleKeyDown}
+          onChange={handleChange}
+          rows={1} 
+          spellCheck={false}
+        />
+      </div>
       )}
     </div>
   )
