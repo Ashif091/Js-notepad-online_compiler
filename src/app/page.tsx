@@ -4,19 +4,21 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import TextEditor from "./components/TextEditor"
 import Console from "./components/Console"
-import { Play, RotateCcw, FileText } from "lucide-react" // Import icons
+import { Play, RotateCcw, FileText, Info } from "lucide-react" // Import icons
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "./components/ui/tooltip"
+import Settings from "./components/Settings"
 
 export default function Home() {
   const [code, setCode] = useState<string>("// Write your JavaScript code here\nconsole.log('Hello, World!');")
   const [output, setOutput] = useState<string>("")
   const [errorLine, setErrorLine] = useState<number | null>(null)
   const [showConsole, setShowConsole] = useState<boolean>(false)
+  const [showSettings, setShowSettings] = useState<boolean>(false)
 
   // Load code from localStorage on initial client-side render
   useEffect(() => {
@@ -108,6 +110,13 @@ export default function Home() {
           >
             <RotateCcw className="w-4 h-4" />
           </button>
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className="p-2 text-white rounded transition duration-200"
+            aria-label="Settings"
+          >
+            <Info className="w-4 h-4" />
+          </button>
         </div>
       </header>
 
@@ -118,6 +127,7 @@ export default function Home() {
 
         {/* Console Output */}
         {showConsole && <Console output={output} onClose={() => setShowConsole(false)} />}
+        <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
       </main>
     </div>
   )

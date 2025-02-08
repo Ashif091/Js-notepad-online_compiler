@@ -1,7 +1,9 @@
 "use client";
 import type React from "react";
 import { useRef, useEffect, useState } from "react";
-
+import { useSettingsStore } from "../store/settingsStore"
+import dynamic from "next/dynamic"
+const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false })
 interface TextEditorProps {
   code: string;
   setCode: (code: string) => void;
@@ -13,7 +15,9 @@ const TextEditor: React.FC<TextEditorProps> = ({ code, setCode, errorLine }) => 
   const lineNumbersRef = useRef<HTMLDivElement>(null);
   const [undoStack, setUndoStack] = useState<{ value: string; cursorPos: number }[]>([]);
   const [redoStack, setRedoStack] = useState<{ value: string; cursorPos: number }[]>([]);
-
+  
+  const { tabFunction, formatFunction ,useCodeEditor} = useSettingsStore()
+  
   useEffect(() => {
     const syncScroll = () => {
       if (textareaRef.current && lineNumbersRef.current) {
@@ -24,7 +28,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ code, setCode, errorLine }) => 
     return () => textareaRef.current?.removeEventListener("scroll", syncScroll);
   }, []);
 
-  const codeLines = code.split("\n");
+  // const codeLines = code.split("\n");
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const textarea = textareaRef.current;
@@ -36,14 +40,15 @@ const TextEditor: React.FC<TextEditorProps> = ({ code, setCode, errorLine }) => 
       return ;
     }
     // Handle formatting (Shift+Alt+F)
-    if (event.shiftKey && event.altKey && event.key === "F") {
-      event.preventDefault();
+    if (formatFunction && event.shiftKey && event.altKey && event.key === "F") {
+      event.preventDefault()
       formatCode();
-      return;
+      return
     }
 
+
     // Handle Tab key
-    if (event.key === "Tab") {
+    if (tabFunction && event.key === "Tab") {
       event.preventDefault();
 
       if (event.shiftKey) {
@@ -258,40 +263,60 @@ const TextEditor: React.FC<TextEditorProps> = ({ code, setCode, errorLine }) => 
       console.error("Error formatting code:", error);
     }
   };
+  const handleMonacoChange = (value: string | undefined) => {
+    if (value !== undefined) {
+      setCode(value)
+    }
+  }
 
   return (
     <div className="w-full h-[calc(100vh-4rem)] relative font-mono text-sm">
-      {/* Line Numbers */}
-      <div
-        ref={lineNumbersRef}
-        className="absolute top-0 left-0 w-12 h-full bg-[#1e1e1e] text-right pr-2 overflow-hidden"
-        style={{ paddingTop: "0.5rem" }}
-      >
-        {codeLines.map((_, index) => (
+      {useCodeEditor ? (
+        <MonacoEditor
+          height="100%"
+          defaultLanguage="javascript"
+          theme="vs-dark"
+          value={code}
+          onChange={handleMonacoChange}
+          options={{
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            fontSize: 14,
+          }}
+        />
+      ) : (
+        <>
+          {/* Line Numbers */}
           <div
-            key={index}
-            className={`leading-6 ${
-              errorLine === index + 1 ? "text-red-500 font-bold" : "text-gray-500"
-            }`}
+            ref={lineNumbersRef}
+            className="absolute top-0 left-0 w-12 h-full bg-[#1e1e1e] text-right pr-2 overflow-hidden"
+            style={{ paddingTop: "0.5rem" }}
           >
-            {index + 1}
+            {code.split("\n").map((_, index) => (
+              <div
+                key={index}
+                className={`leading-6 ${errorLine === index + 1 ? "text-red-500 font-bold" : "text-gray-500"}`}
+              >
+                {index + 1}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Code Editor */}
-      <textarea
-        ref={textareaRef}
-        className="w-full h-full p-2 pl-14 bg-[#272727] text-white rounded-none resize-none outline-none"
-        value={code}
-        placeholder="Write your JavaScript code here..."
-        style={{ lineHeight: "1.5rem" }}
-        onKeyDown={handleKeyDown}
-        onChange={handleChange}
-        rows={20}
-      ></textarea>
+          {/* Code Editor */}
+          <textarea
+            ref={textareaRef}
+            className="w-full h-full p-2 pl-14 bg-[#272727] text-white rounded-none resize-none outline-none"
+            value={code}
+            placeholder="Write your JavaScript code here..."
+            style={{ lineHeight: "1.5rem" }}
+            onKeyDown={handleKeyDown}
+            onChange={handleChange}
+            rows={20}
+          ></textarea>
+        </>
+      )}
     </div>
-  );
+  )
 };
 
 export default TextEditor;
