@@ -57,7 +57,7 @@ export default function Home() {
       const response = await axios.post("/api/run-code", {code})
       if (response.data.success) {
         setOutput(response.data.output)
-        console.log("out", response.data.output)
+        console.log("out", response.data)
         setErrorLine(null) // Clear error line if successful
       } else {
         setOutput(`Error: ${response.data.error}`)
