@@ -126,17 +126,37 @@ export async function POST(req: Request) {
     await context.eval(`
       globalThis.console = {
         log: function() {
-          // Convert arguments into an array.
           var args = Array.from(arguments);
-          // Use JSON.stringify directly for compact output.
           var formatted = args.map(function(arg) {
+            var tag = Object.prototype.toString.call(arg);
+            if (tag === "[object Map]") {
+              var entries = Array.from(arg.entries()).map(function(entry) {
+                var key = (typeof entry[0] === "string") ? ("'" + entry[0] + "'") : String(entry[0]);
+                var value = (typeof entry[1] === "string") ? ("'" + entry[1] + "'") : String(entry[1]);
+                return key + " => " + value;
+              }).join(", ");
+              return "Map(" + arg.size + ") { " + entries + " }";
+            }
+            if (tag === "[object Set]") {
+              var items = Array.from(arg).map(function(item) {
+                return (typeof item === "string") ? ("'" + item + "'") : String(item);
+              }).join(", ");
+              return "Set(" + arg.size + ") { " + items + " }";
+            }
+            // For plain objects, pretty-print them
+            if (tag === "[object Object]") {
+              return JSON.stringify(arg, null, 2);
+            }
+            // For arrays, print them in a single line
+            if (tag === "[object Array]") {
+              return JSON.stringify(arg);
+            }
             try {
               return JSON.stringify(arg);
             } catch(e) {
               return "[Unserializable Object]";
             }
           });
-          // Call our external log function with the joined string.
           globalThis.log.applySync(undefined, [formatted.join(" ")]);
         }
       };
