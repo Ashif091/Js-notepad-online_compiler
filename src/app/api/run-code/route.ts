@@ -129,6 +129,9 @@ export async function POST(req: Request) {
           var args = Array.from(arguments);
           var formatted = args.map(function(arg) {
             var tag = Object.prototype.toString.call(arg);
+            if (arg === undefined) {
+              return "undefined";
+            }
             if (tag === "[object Map]") {
               var entries = Array.from(arg.entries()).map(function(entry) {
                 var key = (typeof entry[0] === "string") ? ("'" + entry[0] + "'") : String(entry[0]);
