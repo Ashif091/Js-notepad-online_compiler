@@ -4,7 +4,7 @@ import {useState, useEffect} from "react"
 import axios from "axios"
 import TextEditor from "./components/TextEditor"
 import Console from "./components/Console"
-import {Play, RotateCcw, FileText, Info} from "lucide-react" // Import icons
+import {Play, RotateCcw, FileText, Info, Minimize2, Maximize2} from "lucide-react" // Import icons
 import {
   Tooltip,
   TooltipContent,
@@ -21,6 +21,7 @@ export default function Home() {
   const [errorLine, setErrorLine] = useState<number | null>(null)
   const [showConsole, setShowConsole] = useState<boolean>(false)
   const [showSettings, setShowSettings] = useState<boolean>(false)
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
 
   // Load code from localStorage on initial client-side render
   useEffect(() => {
@@ -79,6 +80,22 @@ export default function Home() {
     setErrorLine(null)
     setShowConsole(false)
   }
+  const toggleFullScreen = () => {
+    const elem = document.documentElement; // Get the root element (html)
+    if (!document.fullscreenElement) {
+      // Enter full-screen mode
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+        setIsFullScreen(true);
+      }
+    } else {
+      // Exit full-screen mode
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        setIsFullScreen(false);
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
@@ -137,13 +154,30 @@ export default function Home() {
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+          <button
+            onClick={toggleFullScreen}
+            className="p-2 text-white rounded transition duration-200"
+            aria-label="Toggle Fullscreen"
+          >
+            {isFullScreen ? (
+              <Minimize2 className="w-4 h-4" />
+            ) : (
+              <Maximize2 className="w-4 h-4" />
+            )}
+          </button>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="flex flex-1 space-x-4 cust-scroll">
         {/* Text Editor */}
-        <TextEditor code={code} setCode={setCode} setOutput={setOutput} errorLine={errorLine} setShowConsole={setShowConsole} />
+        <TextEditor
+          code={code}
+          setCode={setCode}
+          setOutput={setOutput}
+          errorLine={errorLine}
+          setShowConsole={setShowConsole}
+        />
 
         {/* Console Output */}
         {showConsole && (
